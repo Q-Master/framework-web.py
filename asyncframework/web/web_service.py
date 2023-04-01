@@ -182,3 +182,6 @@ class WebService(Service):
         else:
             router = routes
         return router
+
+    async def __body__(self, *args, **kwargs):
+        pass
