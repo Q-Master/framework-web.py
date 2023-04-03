@@ -93,7 +93,7 @@ class WebService(Service):
             routes (Union[UrlDispatcher, RouteTableDef]): initialized UrlDispatcher with routes or just route table
         """
         subapp = WebApplication(router=self._make_router(routes), logger=get_logger(route))
-        for attr, value in self.additionals.items():
+        for attr, value in self.__additional_args.items():
             subapp[attr] = value
         self.__app.add_subapp(route, subapp)
 
