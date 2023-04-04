@@ -5,7 +5,7 @@ from .web_request import *
 from .web_response import *
 from .web_service import *
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 __title__ = 'asyncframework-web'
 __description__ = 'Async framework web addon.'
