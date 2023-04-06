@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import Union, Optional
 from aiohttp.web import Response
+from aiohttp.typedefs import LooseHeaders
 from packets.packet import PacketBase
 from packets._json import json
 
@@ -8,7 +9,7 @@ from packets._json import json
 __all__ = ['make_response']
 
 
-def make_response(source: Union[PacketBase, dict, str], status: int = 200) -> Response:
+def make_response(source: Union[PacketBase, dict, str], status: int = 200, headers: Optional[LooseHeaders] = None) -> Response:
     """Create response from server.
     A little sugar to create responses from various types of data
     and automaticaly set the MIME-type.
@@ -26,4 +27,4 @@ def make_response(source: Union[PacketBase, dict, str], status: int = 200) -> Re
         res, rtype = json.dumps(source), 'application/json'
     else:
         res, rtype = source, None
-    return Response(text=res, content_type=rtype, status=status)
+    return Response(text=res, content_type=rtype, status=status, headers=headers)
