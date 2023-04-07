@@ -36,6 +36,10 @@ class WebService(Service):
     __additional_args: Dict[str, Any]
     __app: WebApplication
 
+    @property
+    def app(self):
+        return self.__app
+
     def __init__(self, 
         host: Optional[Union[str, Sequence[str]]] = None, port: Optional[int] = None, 
         path: Optional[Union[str, Sequence[str]]] = None, 
