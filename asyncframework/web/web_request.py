@@ -119,12 +119,12 @@ class WebRequest(Request):
                 yield v
         return tuple(next())
     
-    def get_auth(self) -> Optional[Tuple[str, str]]:
+    def get_auth(self) -> Tuple[Optional[str], Optional[str]]:
         auth = self.headers.get('Authorization', None)
         if auth:
             auth_type, token = auth.split(maxsplit=1)
             return(auth_type, token)
-        return None
+        return (None, None)
 
 
 class WebRequestArgsPacket(Packet):
