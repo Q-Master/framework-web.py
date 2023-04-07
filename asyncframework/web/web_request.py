@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from typing import Dict, Any, Optional, Generator, TypeVar, Type, Sequence
+from typing import Dict, Any, Optional, Generator, TypeVar, Type, Sequence, Tuple
 from aiohttp.web import HTTPBadRequest, Request
 from asyncframework.log.log import get_logger
 from packets.packet import Packet
@@ -118,6 +118,13 @@ class WebRequest(Request):
                     raise HTTPBadRequest(reason=f'Missing argument {k}')
                 yield v
         return tuple(next())
+    
+    def get_auth(self) -> Optional[Tuple[str, str]]:
+        auth = self.headers.get('Authorization', None)
+        if auth:
+            auth_type, token = auth.split(maxsplit=1)
+            return(auth_type, token)
+        return None
 
 
 class WebRequestArgsPacket(Packet):
