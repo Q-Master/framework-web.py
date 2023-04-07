@@ -3,7 +3,7 @@ from typing import Dict, Any, Optional, Generator, TypeVar, Type, Sequence, Tupl
 from aiohttp.web import HTTPBadRequest, Request
 from asyncframework.log.log import get_logger
 from packets.packet import Packet
-from packets._json import json
+from packets import json
 
 
 __all__ = ['WebRequest', 'WebRequestArgsPacket']

@@ -3,7 +3,7 @@ from typing import Union, Optional
 from aiohttp.web import Response
 from aiohttp.typedefs import LooseHeaders
 from packets.packet import PacketBase
-from packets._json import json
+from packets import json
 
 
 __all__ = ['make_response']

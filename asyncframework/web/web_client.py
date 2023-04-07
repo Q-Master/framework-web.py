@@ -4,7 +4,7 @@ import aiohttp
 import asyncio
 import time
 from asyncframework.log.log import get_logger
-from packets._json import json
+from packets import json
 
 
 __all__ = ['WebClient', 'WebClientResponse']
