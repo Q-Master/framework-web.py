@@ -1,7 +1,11 @@
 # -*- coding:utf-8 -*-
-from typing import Type
+from typing import Type, Optional, Callable, Mapping, Any, Iterable
 import asyncio
+from logging import Logger
 from aiohttp.web import Application, Request
+from aiohttp.web_response import StreamResponse
+from aiohttp.web_urldispatcher import UrlDispatcher
+from aiohttp.log import web_logger
 from aiohttp.http_parser import RawRequestMessage
 from aiohttp.streams import StreamReader
 from aiohttp.web_protocol import RequestHandler
@@ -15,6 +19,19 @@ __all__ = ['WebApplication']
 class WebApplication(Application):
     """Custom WebApplication class for using custom Request
     """
+
+    def __init__(self, *, 
+        controller_factory: Optional[Callable] = None,
+        logger: Logger = web_logger, 
+        router: Optional[UrlDispatcher] = None, 
+        middlewares: Iterable[Callable] = (), 
+        handler_args: Optional[Mapping[str, Any]] = None, 
+        client_max_size: int = 1024 ** 2, 
+        loop: Optional[asyncio.AbstractEventLoop] = None, 
+        ) -> None:
+        super().__init__(logger=logger, router=router, middlewares=middlewares, handler_args=handler_args, client_max_size=client_max_size, loop=loop)
+        self._controller_factory = controller_factory
+    
     def _make_request(
         self,
         message: RawRequestMessage,
@@ -33,3 +50,10 @@ class WebApplication(Application):
             self._loop,
             client_max_size=self._client_max_size,
         )
+
+    async def _handle(self, request: Request) -> StreamResponse:
+        if self._controller_factory:
+            request.controller = self._controller_factory()
+        else:
+            request.controller = None
+        return await super()._handle(request)

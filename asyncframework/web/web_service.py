@@ -1,6 +1,5 @@
-
 # -*- coding:utf-8 -*-
-from typing import Optional, Union, Sequence, Dict, Any
+from typing import Optional, Union, Sequence, Dict, Any, Callable
 import asyncio
 import socket
 from ssl import SSLContext
@@ -49,6 +48,7 @@ class WebService(Service):
         reuse_address: Optional[bool] = None, reuse_port: Optional[bool] = None, backlog: int = 128,
         access_log_class=AccessLogger, access_log_format=AccessLogger.LOG_FORMAT,
         routes: Optional[Union[UrlDispatcher, RouteTableDef]] = None,
+        controller_factory: Optional[Callable] = None,
         **additional_app_attrs) -> None:
         """Constructor
 
@@ -78,11 +78,13 @@ class WebService(Service):
         self.__backlog = backlog
         self.__access_logger = access_log_class
         self.__access_log_format = access_log_format
+        self.__controller_factory = controller_factory
 
         self.__app = WebApplication(
             logger=self.log,
             loop=self.ioloop,
-            router=self._make_router(routes)
+            router=self._make_router(routes),
+            controller_factory=self.__controller_factory
         )
 
         self.__additional_args = additional_app_attrs
@@ -96,7 +98,12 @@ class WebService(Service):
             route (str): base path for new routes
             routes (Union[UrlDispatcher, RouteTableDef]): initialized UrlDispatcher with routes or just route table
         """
-        subapp = WebApplication(router=self._make_router(routes), logger=get_logger(route))
+        subapp = WebApplication(
+            logger=get_logger(route),
+            loop=self.ioloop,
+            router=self._make_router(routes),
+            controller_factory=self.__controller_factory 
+        )
         for attr, value in self.__additional_args.items():
             subapp[attr] = value
         self.__app.add_subapp(route, subapp)
