@@ -49,11 +49,5 @@ class WebApplication(Application):
             task,
             self._loop,
             client_max_size=self._client_max_size,
+            controller=self._controller_factory() if self._controller_factory else None
         )
-
-    async def _handle(self, request: Request) -> StreamResponse:
-        if self._controller_factory:
-            request.controller = self._controller_factory()
-        else:
-            request.controller = None
-        return await super()._handle(request)

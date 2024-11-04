@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 from typing import Dict, Any, Optional, Generator, TypeVar, Type, Sequence, Tuple
 from aiohttp.web import HTTPBadRequest, Request
+from aiohttp.helpers import reify
 from asyncframework.log.log import get_logger
 from packets.packet import Packet
 from packets import json
@@ -20,11 +21,17 @@ class WebRequest(Request):
 
     _flat_args: Optional[Dict[str, Any]]
     _flat_headers: Optional[Dict[str, Any]]
+    _controller = None
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, controller = None, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._flat_args = None
         self._flat_headers = None
+        self._controller = controller
+
+    @property
+    def controller(self) -> Any:
+        return self._controller
 
     @property
     def address(self) -> str:
@@ -35,14 +42,14 @@ class WebRequest(Request):
         """
         return self.headers.get('X-Forwarded-For', self.host)
 
-    @property
-    def real_ip(self) -> Optional[str]:
+    @reify
+    def remote(self) -> Optional[str]:
         """Get the caller IP from headers
 
         Returns:
             str: the real IP of the caller
         """
-        return self.headers.get('X-Real-IP', self.remote)
+        return self.headers.get('X-Real-IP', super().remote)
 
     @property
     def flat_headers(self) -> Dict[str, Any]: # type: ignore[override]
