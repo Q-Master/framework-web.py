@@ -9,7 +9,7 @@ from packets import json
 __all__ = ['make_response']
 
 
-def make_response(source: Union[PacketBase, dict, str], status: int = 200, headers: Optional[LooseHeaders] = None) -> Response:
+def make_response(source: Union[PacketBase, dict, list, str], status: int = 200, headers: Optional[LooseHeaders] = None) -> Response:
     """Create response from server.
     A little sugar to create responses from various types of data
     and automaticaly set the MIME-type.
@@ -23,7 +23,7 @@ def make_response(source: Union[PacketBase, dict, str], status: int = 200, heade
     rtype: Optional[str] = None
     if isinstance(source, PacketBase):
         res, rtype = source.dumps(), 'application/json'
-    elif isinstance(source, dict):
+    elif isinstance(source, (dict, list)):
         res, rtype = json.dumps(source), 'application/json'
     else:
         res, rtype = source, None
