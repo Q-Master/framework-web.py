@@ -129,7 +129,10 @@ class WebRequest(Request):
     def get_auth(self) -> Tuple[Optional[str], Optional[str]]:
         auth = self.headers.get('Authorization', None)
         if auth:
-            auth_type, token = auth.split(maxsplit=1)
+            try:
+                auth_type, token = auth.split(maxsplit=1)
+            except ValueError:
+                auth_type, token = None, None
             return(auth_type, token)
         return (None, None)
 
