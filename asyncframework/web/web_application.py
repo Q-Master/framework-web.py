@@ -3,7 +3,6 @@ from typing import Type, Optional, Callable, Mapping, Any, Iterable
 import asyncio
 from logging import Logger
 from aiohttp.web import Application, Request
-from aiohttp.web_response import StreamResponse
 from aiohttp.web_urldispatcher import UrlDispatcher
 from aiohttp.log import web_logger
 from aiohttp.http_parser import RawRequestMessage
@@ -39,9 +38,9 @@ class WebApplication(Application):
         protocol: RequestHandler,
         writer: AbstractStreamWriter,
         task: "asyncio.Task[None]",
-        _cls: Type[Request] = WebRequest,
+        _cls: Type[Request] = Request,
     ) -> Request:
-        return WebRequest(
+        req = _cls(
             message,
             payload,
             protocol,
@@ -49,5 +48,11 @@ class WebApplication(Application):
             task,
             self._loop,
             client_max_size=self._client_max_size,
-            controller=self._controller_factory() if self._controller_factory else None
         )
+        req.controller=self._controller_factory() if self._controller_factory else None
+        return req
+
+    def set_loop(self, ioloop: asyncio.AbstractEventLoop):
+        self._set_loop(ioloop)
+        for app in self._subapps:
+            app._set_loop(ioloop)

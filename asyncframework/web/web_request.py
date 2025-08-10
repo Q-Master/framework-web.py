@@ -1,17 +1,27 @@
 # -*- coding:utf-8 -*-
-from typing import Dict, Any, Optional, Generator, TypeVar, Type, Sequence, Tuple
-from aiohttp.web import HTTPBadRequest, Request
-from aiohttp.helpers import reify
+from typing import Dict, Any, Optional, Generator, TypeVar, Type, Sequence, Tuple, Union, cast, Callable, Awaitable
+from functools import wraps
+from aiohttp.web import HTTPBadRequest, Request, StreamResponse, Response
+from aiohttp.helpers import reify, _SENTINEL, sentinel
+from aiohttp.typedefs import StrOrURL, LooseHeaders, Handler
 from asyncframework.log.log import get_logger
 from packets.packet import Packet
 from packets import json
 
 
-__all__ = ['WebRequest', 'WebRequestArgsPacket']
+__all__ = ['WebRequest', 'WebRequestArgsPacket', 'webroute']
 
 
 _not_found = object()
 T = TypeVar('T', bound='WebRequestArgsPacket')
+WebHandler = Callable[['WebRequest'], Awaitable['StreamResponse']]
+
+
+def webroute(handler: WebHandler) -> Handler:
+    @wraps(handler)
+    def inner(request: Request) -> Awaitable[StreamResponse]:
+        return handler(cast(WebRequest, request))
+    return inner
 
 
 class WebRequest(Request):
@@ -28,6 +38,33 @@ class WebRequest(Request):
         self._flat_args = None
         self._flat_headers = None
         self._controller = controller
+
+    def clone(
+        self,
+        *,
+        method: Union[str, _SENTINEL] = sentinel,
+        rel_url: Union[StrOrURL, _SENTINEL] = sentinel,
+        headers: Union[LooseHeaders, _SENTINEL] = sentinel,
+        scheme: Union[str, _SENTINEL] = sentinel,
+        host: Union[str, _SENTINEL] = sentinel,
+        remote: Union[str, _SENTINEL] = sentinel,
+        client_max_size: Union[int, _SENTINEL] = sentinel,
+    ) -> "WebRequest":
+        ret = super().clone(
+            method=method,
+            rel_url=rel_url,
+            headers=headers,
+            scheme=scheme,
+            host=host,
+            remote=remote,
+            client_max_size=client_max_size,
+        )
+        new_ret = cast(WebRequest, ret)
+        new_ret._controller = self._controller
+        new_ret._flat_args = self._flat_args
+        new_ret._flat_headers = self._flat_headers
+        new_ret.log = self.log
+        return new_ret
 
     @property
     def controller(self) -> Any:
@@ -52,7 +89,7 @@ class WebRequest(Request):
         return self.headers.get('X-Real-IP', super().remote)
 
     @property
-    def flat_headers(self) -> Dict[str, Any]: # type: ignore[override]
+    def flat_headers(self) -> Dict[str, Any]:
         """Flatten the headers
 
         Returns:

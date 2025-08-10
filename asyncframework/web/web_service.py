@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from typing import Optional, Union, Sequence, Dict, Any, Callable
+from typing import Optional, Union, Sequence, Dict, Any, Callable, Type
 import asyncio
 import socket
 from ssl import SSLContext
@@ -30,7 +30,7 @@ class WebService(Service):
     __reuse_port: Optional[bool]
     __backlog: int
     __runner: AppRunner
-    __access_logger: AbstractAccessLogger
+    __access_logger: Type[AbstractAccessLogger]
     __access_log_format: str
     __additional_args: Dict[str, Any]
     __app: WebApplication
@@ -67,9 +67,9 @@ class WebService(Service):
             routes (Optional[Union[UrlDispatcher, RouteTableDef]], optional): initialized UrlDispatcher with routes or just route table. Defaults to None.
         """
         super().__init__(linear=False)
-        self.__host = [host] if isinstance(host, (str, bytes, bytearray, memoryview)) else host
+        self.__host = [host] if isinstance(host, str) else host
         self.__port = port
-        self.__path = [path] if isinstance(path, (str, bytes, bytearray, memoryview)) else path
+        self.__path = [path] if isinstance(path, str) else path
         self.__sock = [sock] if isinstance(sock, socket.socket) else sock
         self.__shutdown_timeout = shutdown_timeout
         self.__ssl_context = ssl_context
@@ -82,7 +82,6 @@ class WebService(Service):
 
         self.__app = WebApplication(
             logger=self.log,
-            loop=self.ioloop,
             router=self._make_router(routes),
             controller_factory=self.__controller_factory
         )
@@ -100,7 +99,6 @@ class WebService(Service):
         """
         subapp = WebApplication(
             logger=get_logger(route),
-            loop=self.ioloop,
             router=self._make_router(routes),
             controller_factory=self.__controller_factory 
         )
@@ -110,6 +108,7 @@ class WebService(Service):
 
     async def __start__(self) -> None:
         self.log.debug('Starting to run WebService')
+        self.__app.set_loop(self.ioloop)
         self.__runner = AppRunner(
             self.__app,
             handle_signals=False,

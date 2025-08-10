@@ -209,7 +209,7 @@ class WebClient:
         async with self._client.request(method, url, **kwargs) as resp:
             try:
                 js = await resp.json(loads=json.loads)
-            except aiohttp.client_exceptions.ContentTypeError:
+            except aiohttp.ContentTypeError:
                 js = None
             r = WebClientResponse(
                 status = resp.status,
