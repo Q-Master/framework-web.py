@@ -40,7 +40,7 @@ class WebApplication(Application):
         task: "asyncio.Task[None]",
         _cls: Type[Request] = Request,
     ) -> Request:
-        req = _cls(
+        req = WebRequest(
             message,
             payload,
             protocol,
@@ -48,8 +48,8 @@ class WebApplication(Application):
             task,
             self._loop,
             client_max_size=self._client_max_size,
+            controller=self._controller_factory() if self._controller_factory else None
         )
-        req.controller=self._controller_factory() if self._controller_factory else None
         return req
 
     def set_loop(self, ioloop: asyncio.AbstractEventLoop):
