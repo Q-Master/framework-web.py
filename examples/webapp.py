@@ -1,7 +1,9 @@
 # -*- coding:utf-8 -*-
 from typing import Optional, Union, List
 from packets import PacketBase, makeField
-from packets.processors import string_t, int_t, bool_t
+from packets.typedef.string_t import string_t
+from packets.typedef.int_t import int_t
+from packets.typedef.bool_t import bool_t
 from asyncframework.app import Script, main, Service
 from asyncframework.app.config import Config
 from asyncframework.log import get_logger, LoggerTaggingAdapter
@@ -30,7 +32,7 @@ class Controller():
 
 
 class test_request_packet(WebRequestArgsPacket):
-    is_healthy: str = makeField(bool_t, name='i', required=True)   # is web service healthy?
+    is_healthy: bool = makeField(bool_t, name='i', required=True)   # is web service healthy?
     req: str = makeField(string_t, name='r', required=True)   # how much is is healthy?
     reply_id: int = makeField(int_t, name='resp', required=True)   # reply id
 

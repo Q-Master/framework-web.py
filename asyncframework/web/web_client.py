@@ -188,7 +188,7 @@ class WebClient:
                 self.log.debug(f'Sleeping for {self._session_timeout} sec')
                 await asyncio.sleep(self._session_timeout)
                 if time.time() >= self._last_req_time + self._session_timeout:
-                    self.log.warn('Close session by timeout')
+                    self.log.warning('Close session by timeout')
                     await self.close(wait=True)
                     break
                 else:

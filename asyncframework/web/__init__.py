@@ -5,7 +5,7 @@ from .web_request import *
 from .web_response import *
 from .web_service import *
 
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 
 __title__ = 'asyncframework-web'
 __description__ = 'Async framework web addon.'
@@ -17,4 +17,4 @@ __author__ = 'Vladimir Berezenko'
 __email__ = 'qmaster2000@gmail.com'
 
 __license__ = 'MIT'
-__copyright__ = 'Copyright 2019-2023 Vladimir Berezenko'
+__copyright__ = 'Copyright 2019-2026 Vladimir Berezenko'
